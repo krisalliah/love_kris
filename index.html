@@ -37,7 +37,9 @@
     }
 
     #yes { background: #ff4d6d; color: white; }
-    #no { background: gray; color: white; position: absolute; }
+    #no { background: gray; color: white; position: absolute;
+        transition: transform 0.15s ease;
+     }
 
     #countdown {
       font-size: 60px;
@@ -67,100 +69,162 @@
 
 <body>
 
-<audio id="bgMusic" loop>
-  <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mp3">
-</audio>
-
-<div class="card" id="mainCard">
-  <h1>Enter Your Name 💕</h1>
-  <input type="text" id="nameInput" value="Kris">
-  <br><br>
-  <button onclick="start()">Continue ❤️</button>
-</div>
-
-<div id="countdown">3</div>
+        <audio id="bgMusic" loop>
+          <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mp3">
+        </audio>
+        
+        <div class="card" id="mainCard">
+          <h1>Enter Your Name 💕</h1>
+        
+          <input 
+            type="text" 
+            id="nameInput" 
+            placeholder="Type your name 💖" 
+            oninput="checkInput()"
+          >
+        
+          <br><br>
+        
+          <button 
+            id="continueBtn" 
+            onclick="start()" 
+            disabled 
+            style="opacity:0.6; cursor:not-allowed;"
+          >
+            Continue ❤️
+          </button>
+        </div>
+        
+        <div id="countdown" style="display:none;">3</div>
 
 <script>
 
-function start() {
-  document.getElementById("bgMusic").play();
-
-  const name = document.getElementById("nameInput").value;
-  document.getElementById("mainCard").style.display = "none";
-
-  const countdown = document.getElementById("countdown");
-  countdown.style.display = "block";
-
-  let count = 3;
-  const interval = setInterval(() => {
-    count--;
-    countdown.innerText = count;
-    if (count === 0) {
-      clearInterval(interval);
-      showLoveQuestion(name);
+    // Enable/Disable Continue button based on input
+    function checkInput() {
+      const name = document.getElementById("nameInput").value.trim();
+      const btn = document.getElementById("continueBtn");
+    
+      if (name.length > 0) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+        btn.style.cursor = "not-allowed";
+      }
     }
-  }, 1000);
-}
-
-function showLoveQuestion(name) {
-  document.body.innerHTML = `
-    <div class="card">
-      <h1>${name}… Do You Love Me? 💖</h1>
-      <div class="heart">❤️</div>
-      <br>
-      <button id="yes" onclick="areYouSure()">Yes 😍</button>
-      <button id="no" onmouseover="moveNo()">No 😢</button>
-    </div>
-  `;
-}
-
-function moveNo() {
-  const noBtn = document.getElementById("no");
-  noBtn.style.top = Math.random() * window.innerHeight + "px";
-  noBtn.style.left = Math.random() * window.innerWidth + "px";
-}
-
-function areYouSure() {
-  document.body.innerHTML = `
-    <div class="card">
-      <h1>Are you REALLY sure? 😏</h1>
-      <button onclick="finalYes()">YES I AM 😤💘</button>
-    </div>
-  `;
-}
-
-function finalYes() {
-  document.body.innerHTML = `
-    <div style="text-align:center; margin-top:40px;">
-      <h1 style="font-size:40px;">I KNEW IT 😎❤️</h1>
-
-      <video autoplay muted loop controls>
-        <source src="our-reel.mp4" type="video/mp4">
-      </video>
-
-      <p style="font-size:22px; margin-top:20px;">
-        Kris... <br>
-        I love you more than you do ❤️ <br>
-        More than pizza 🍕 <br>
-        More than sleep 😴 <br>
-        More than the entire universe 🌌
-      </p>
-
-      <h2 style="margin-top:30px; font-size:28px;">
-        Forever Yours, <br><br>
-        ❤️ YOUR_NAME_HERE ❤️
-      </h2>
-    </div>
-  `;
-
-  confetti({
-    particleCount: 300,
-    spread: 150,
-    origin: { y: 0.6 }
-  });
-}
-
-</script>
+    
+    // Allow Enter key to trigger start
+    document.addEventListener("DOMContentLoaded", function () {
+      const input = document.getElementById("nameInput");
+      input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter" && !document.getElementById("continueBtn").disabled) {
+          start();
+        }
+      });
+    });
+    
+    let userName = "";
+    
+    // Start Countdown
+    function start() {
+      userName = document.getElementById("nameInput").value.trim();
+    
+      document.getElementById("bgMusic").play();
+      document.getElementById("mainCard").style.display = "none";
+    
+      const countdown = document.getElementById("countdown");
+      countdown.style.display = "block";
+    
+      let count = 3;
+      countdown.innerText = count;
+    
+      const interval = setInterval(() => {
+        count--;
+        countdown.innerText = count;
+        if (count === 0) {
+          clearInterval(interval);
+          showLoveQuestion();
+        }
+      }, 1000);
+    }
+    
+    // Love Question Screen
+    function showLoveQuestion() {
+      document.body.innerHTML = `
+        <div class="card">
+          <h1>${userName}… Do You Love Me? 💖</h1>
+          <div class="heart">❤️</div>
+          <br>
+          <button id="yes" onclick="areYouSure()">Yes 😍</button>
+          <button id="no" onmousemove="moveNo(event)">No 😢</button>
+        </div>
+      `;
+    }
+    
+    // Move No Button
+    function moveNo(event) {
+      const noBtn = document.getElementById("no");
+    
+      const rect = noBtn.getBoundingClientRect();
+    
+      const btnCenterX = rect.left + rect.width / 2;
+      const btnCenterY = rect.top + rect.height / 2;
+    
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+    
+      const moveX = (btnCenterX - mouseX) * 0.8;
+      const moveY = (btnCenterY - mouseY) * 0.8;
+    
+      noBtn.style.position = "relative";
+      noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    }   
+      
+    // Are You Sure Screen
+    function areYouSure() {
+      document.body.innerHTML = `
+        <div class="card">
+          <h1>Are you REALLY sure, ${userName}? 😏</h1>
+          <button onclick="finalYes()">YES I AM 😤💘</button>
+        </div>
+      `;
+    }
+    
+    // Final Screen
+    function finalYes() {
+      document.body.innerHTML = `
+        <div style="text-align:center; margin-top:40px;">
+          <h1 style="font-size:40px;">I KNEW IT 😎❤️</h1>
+    
+          <video autoplay muted loop controls>
+            <source src="our-reel.mp4" type="video/mp4">
+          </video>
+    
+          <p style="font-size:22px; margin-top:20px;">
+            ${userName}... <br>
+            I love you more than you do ❤️ <br>
+            More than pizza 🍕 <br>
+            More than sleep 😴 <br>
+            More than the entire universe 🌌
+          </p>
+    
+          <h2 style="margin-top:30px; font-size:28px;">
+            Forever Yours, <br><br>
+            ❤️ ${userName} ❤️
+          </h2>
+        </div>
+      `;
+    
+      confetti({
+        particleCount: 300,
+        spread: 150,
+        origin: { y: 0.6 }
+      });
+    }
+    
+    </script>
 
 </body>
 </html>
